@@ -798,6 +798,8 @@
 #define TR_PATH_TOO_LONG       "Pfad zu Lang"
 #define TR_VIEW_TEXT           "View Text"
 #define TR_FLASH_BOOTLOADER    "Flash BootLoader"
+#define TR_FLASH_EXTERNAL_DEVICE "Flash External Device"
+#define TR_FLASH_INTERNAL_MODULE "Flash Internal Module"
 #define TR_WRITING             "\032Writing..."
 #define TR_CONFIRM_FORMAT      "Formatieren bestätigen?"
 #define TR_INTERNALRF          "----Internes HF-Modul----------"

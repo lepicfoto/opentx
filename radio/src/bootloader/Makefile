@@ -111,7 +111,7 @@ else
   LDSCRIPT = ../targets/taranis/stm32_ramBoot.ld
   TRGT = arm-none-eabi-
   CPPDEFS += -DHSE_VALUE=12000000
-  CPPDEFS += -DPCBTARANIS 
+  CPPDEFS += -DPCBTARANIS -DXCURVES
   FULL_PRJ = $(PROJECT)_ramBoot
   ifeq ($(PCBREV), REV9E)
     CPPDEFS += -DSTM32F40_41xxx

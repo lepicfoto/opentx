@@ -179,6 +179,20 @@
 #define NUM_CYC                3
 #define NUM_CAL_PPM            4
 
+#if defined(XCURVES)
+enum CurveType {
+  CURVE_TYPE_STANDARD,
+  CURVE_TYPE_CUSTOM,
+  CURVE_TYPE_LAST = CURVE_TYPE_CUSTOM
+};
+PACK(typedef struct {
+  uint8_t type:3;
+  uint8_t smooth:1;
+  uint8_t spare:4;
+  int8_t  points;
+}) CurveInfo;
+#endif
+
 #if defined(PCBTARANIS)
   #define LEN_MODEL_NAME       12
   #define LEN_TIMER_NAME       8
@@ -187,17 +201,6 @@
   #define LEN_EXPOMIX_NAME     8
   #define LEN_CHANNEL_NAME     6
   #define LEN_INPUT_NAME       4
-  enum CurveType {
-    CURVE_TYPE_STANDARD,
-    CURVE_TYPE_CUSTOM,
-    CURVE_TYPE_LAST = CURVE_TYPE_CUSTOM
-  };
-PACK(typedef struct {
-  uint8_t type:3;
-  uint8_t smooth:1;
-  uint8_t spare:4;
-  int8_t  points;
-}) CurveInfo;
   #define MAX_CURVES           32
   #define NUM_POINTS           512
   #define CURVDATA             CurveInfo
@@ -330,28 +333,37 @@ enum BeeperMode {
   int8_t   backgroundVolume;
 #endif
 
-#if defined(PCBTARANIS)
-enum uartModes {
-  UART_MODE_NONE,
-  UART_MODE_TELEMETRY_MIRROR,
-  UART_MODE_TELEMETRY,
-  UART_MODE_SBUS_TRAINER,
-  // UART_MODE_CPPM_TRAINER,
-#if defined(DEBUG)
-  UART_MODE_DEBUG,
-#endif
-  UART_MODE_COUNT,
-  UART_MODE_MAX = UART_MODE_COUNT-1
-};
+#define LEN_SWITCH_NAME 3
+#define LEN_ANA_NAME    3
 
-#define HAS_WIRELESS_TRAINER_HARDWARE() (g_eeGeneral.uart3Mode==UART_MODE_SBUS_TRAINER/* || g_eeGeneral.uart3Mode==UART_MODE_CPPM_TRAINER*/)
-#define EXTRA_GENERAL_FIELDS \
-  EXTRA_GENERAL_FIELDS_ARM \
-  uint8_t  uart3Mode; \
-  uint8_t  potsType; /*two bits for every pot*/\
-  uint8_t  backlightColor;
+#if defined(PCBTARANIS)
+  enum uartModes {
+    UART_MODE_NONE,
+    UART_MODE_TELEMETRY_MIRROR,
+    UART_MODE_TELEMETRY,
+    UART_MODE_SBUS_TRAINER,
+    // UART_MODE_CPPM_TRAINER,
+  #if defined(DEBUG)
+    UART_MODE_DEBUG,
+  #endif
+    UART_MODE_COUNT,
+    UART_MODE_MAX = UART_MODE_COUNT-1
+  };
+  #define HAS_WIRELESS_TRAINER_HARDWARE() (g_eeGeneral.uart3Mode==UART_MODE_SBUS_TRAINER/* || g_eeGeneral.uart3Mode==UART_MODE_CPPM_TRAINER*/)
+  #define EXTRA_GENERAL_FIELDS \
+    EXTRA_GENERAL_FIELDS_ARM \
+    uint8_t  uart3Mode; \
+    uint8_t  potsType; /*two bits for every pot*/\
+    uint8_t  backlightColor; \
+    swarnstate_t switchUnlockStates; \
+    CustomFunctionData customFn[NUM_CFN]; \
+    uint32_t switchConfig; \
+    char switchNames[NUM_SWITCHES][LEN_SWITCH_NAME]; \
+    char anaNames[NUM_STICKS+NUM_POTS][LEN_ANA_NAME];
 #elif defined(CPUARM)
-  #define EXTRA_GENERAL_FIELDS EXTRA_GENERAL_FIELDS_ARM
+  #define EXTRA_GENERAL_FIELDS \
+    EXTRA_GENERAL_FIELDS_ARM \
+    CustomFunctionData customFn[NUM_CFN];
 #elif defined(PXX)
   #define EXTRA_GENERAL_FIELDS uint8_t  countryCode;
 #else
@@ -643,13 +655,10 @@ enum SwitchConfig {
   SWITCH_TOGGLE,
   SWITCH_2POS,
   SWITCH_3POS,
-#if !defined(REV9E)
+#if defined(PCBTARANIS) && !defined(REV9E)
   SWITCH_2x2POS
 #endif
 };
-
-#define LEN_SWITCH_NAME 3
-#define LEN_ANA_NAME    3
 
 #define ALTERNATE_VIEW 0x10
 PACK(typedef struct {
@@ -696,16 +705,6 @@ PACK(typedef struct {
   int8_t    vBatMax;
 
   EXTRA_GENERAL_FIELDS
-
-  TARANIS_FIELD(swarnstate_t switchUnlockStates)
-
-  ARM_FIELD(CustomFunctionData customFn[NUM_CFN])
-
-  TARANIS_FIELD(uint32_t switchConfig)
-
-  TARANIS_FIELD(char switchNames[NUM_SWITCHES][LEN_SWITCH_NAME])
-
-  TARANIS_FIELD(char anaNames[NUM_STICKS+NUM_POTS][LEN_ANA_NAME])
 
 }) EEGeneral;
 
@@ -754,7 +753,7 @@ inline int getSwitchWarningsAllowed()
 }
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(XCURVES)
 enum CurveRefType {
   CURVE_REF_DIFF,
   CURVE_REF_EXPO,
@@ -1439,7 +1438,7 @@ enum TelemetryScreenType {
   TELEMETRY_SCREEN_TYPE_NONE,
   TELEMETRY_SCREEN_TYPE_VALUES,
   TELEMETRY_SCREEN_TYPE_GAUGES,
-#if defined(PCBTARANIS) && defined(LUA)
+#if defined(LUA)
   TELEMETRY_SCREEN_TYPE_SCRIPT,
   TELEMETRY_SCREEN_TYPE_MAX = TELEMETRY_SCREEN_TYPE_SCRIPT
 #else
@@ -1756,7 +1755,7 @@ enum SwitchSources {
 enum MixSources {
   MIXSRC_NONE,
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
   MIXSRC_FIRST_INPUT,             LUA_EXPORT_MULTIPLE("input", "Input [I%d]", MAX_INPUTS)
   MIXSRC_LAST_INPUT = MIXSRC_FIRST_INPUT+MAX_INPUTS-1,
 

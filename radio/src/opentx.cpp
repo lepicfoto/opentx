@@ -289,6 +289,14 @@ void generalDefault()
   g_eeGeneral.backgroundVolume = 1;
 #endif
 
+#if defined(CPUARM)
+  for (int i=0; i<NUM_STICKS; ++i) {
+    g_eeGeneral.trainer.mix[i].mode = 2;
+    g_eeGeneral.trainer.mix[i].srcChn = channel_order(i+1) - 1;
+    g_eeGeneral.trainer.mix[i].studWeight = 100;
+  }
+#endif
+
   g_eeGeneral.chkSum = 0xFFFF;
 }
 
@@ -301,7 +309,7 @@ uint16_t evalChkSum()
   return sum;
 }
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
 void clearInputs()
 {
   memset(g_model.expoData, 0, sizeof(g_model.expoData)); // clear all expos
@@ -340,7 +348,7 @@ inline void applyDefaultTemplate()
 void applyDefaultTemplate()
 {
   for (int i=0; i<NUM_STICKS; i++) {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
     uint8_t stick_index = channel_order(i+1);
     ExpoData *expo = expoAddress(i);
     expo->srcRaw = MIXSRC_Rud - 1 + stick_index;
@@ -361,7 +369,7 @@ void applyDefaultTemplate()
     mix->destCh = i;
     mix->weight = 100;
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
     mix->srcRaw = i+1;
 #else
     mix->srcRaw = MIXSRC_Rud - 1 + channel_order(i+1);
@@ -407,7 +415,7 @@ void modelDefault(uint8_t id)
   }
 #endif
 
-#if defined(CPUARM) && !defined(PCBTARANIS)
+#if defined(PCBSKY9X)
   g_model.externalModule = MODULE_TYPE_PPM;
 #endif
 
@@ -430,7 +438,7 @@ void modelDefault(uint8_t id)
 #endif
 }
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
 bool isInputRecursive(int index)
 {
   ExpoData * line = expoAddress(0);
@@ -452,7 +460,7 @@ int8_t getMovedSource(GET_MOVED_SOURCE_PARAMS)
   int8_t result = 0;
   static tmr10ms_t s_move_last_time = 0;
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
   static int16_t inputsStates[MAX_INPUTS];
   if (min <= MIXSRC_FIRST_INPUT) {
     for (uint8_t i=0; i<MAX_INPUTS; i++) {
@@ -482,7 +490,7 @@ int8_t getMovedSource(GET_MOVED_SOURCE_PARAMS)
   }
 
   if (result || recent) {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
     memcpy(inputsStates, anas, sizeof(inputsStates));
 #endif
     memcpy(sourcesStates, calibratedStick, sizeof(sourcesStates));
@@ -518,7 +526,7 @@ trim_t getRawTrimValue(uint8_t phase, uint8_t idx)
 
 int getTrimValue(uint8_t phase, uint8_t idx)
 {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
   int result = 0;
   for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
     trim_t v = getRawTrimValue(phase, idx);
@@ -544,7 +552,7 @@ int getTrimValue(uint8_t phase, uint8_t idx)
 #endif
 }
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
 bool setTrimValue(uint8_t phase, uint8_t idx, int trim)
 {
   for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
@@ -583,7 +591,7 @@ void setTrimValue(uint8_t phase, uint8_t idx, int trim)
 }
 #endif
 
-#if !defined(PCBTARANIS)
+#if !defined(VIRTUALINPUTS)
 uint8_t getTrimFlightPhase(uint8_t phase, uint8_t idx)
 {
   for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
@@ -893,7 +901,6 @@ bool inputsMoved()
     sum += anaIn(i) >> INAC_STICKS_SHIFT;
   for (uint8_t i=0; i<NUM_SWITCHES; i++)
     sum += getValue(MIXSRC_FIRST_SWITCH+i) >> INAC_SWITCHES_SHIFT;
-
   if (abs((int8_t)(sum-inactivity.sum)) > 1) {
     inactivity.sum = sum;
     return true;
@@ -1094,7 +1101,7 @@ void checkTHR()
   }
   else {
     calibratedStick[thrchn] = -1024;
-#if !defined(PCBTARANIS)
+#if !defined(VIRTUALINPUTS)
     if (thrchn < NUM_STICKS) {
       rawAnas[thrchn] = anas[thrchn] = calibratedStick[thrchn];
     }
@@ -1200,7 +1207,7 @@ uint8_t checkTrim(uint8_t event)
     }
     else {
       phase = getTrimFlightPhase(mixerCurrentFlightMode, idx);
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
       before = getTrimValue(phase, idx);
 #else
       before = getRawTrimValue(phase, idx);
@@ -1209,7 +1216,7 @@ uint8_t checkTrim(uint8_t event)
     }
 #else
     phase = getTrimFlightPhase(mixerCurrentFlightMode, idx);
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
     before = getTrimValue(phase, idx);
 #else
     before = getRawTrimValue(phase, idx);
@@ -1250,7 +1257,7 @@ uint8_t checkTrim(uint8_t event)
     else
 #endif
     {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
       if (!setTrimValue(phase, idx, after)) {
         // we don't play a beep, so we exit now the function
         return;
@@ -1317,7 +1324,7 @@ uint16_t BandGap ;
 #if !defined(SIMU)
 uint16_t anaIn(uint8_t chan)
 {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
   return s_anaFilt[chan];
 #elif defined(PCBSKY9X) && !defined(REVA)
   static const uint8_t crossAna[]={1,5,7,0,4,6,2,3};
@@ -1351,14 +1358,14 @@ void getADC()
     for (uint32_t x=0; x<NUMBER_ANALOG; x++) {
       temp[x] += getAnalogValue(x);
     }
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
     if (calibrationState) break;
 #endif
   }
 
   for (uint32_t x=0; x<NUMBER_ANALOG; x++) {
     uint16_t v = temp[x] >> 3;
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
     if (calibrationState) v = temp[x] >> 1;
     StepsCalibData * calib = (StepsCalibData *) &g_eeGeneral.calib[x];
     if (!calibrationState && IS_POT_MULTIPOS(x) && calib->count>0 && calib->count<XPOTS_MULTIPOS_COUNT) {
@@ -1681,7 +1688,7 @@ void doMixerCalculations()
       if (val<0) val=0;  // prevent val be negative, which would corrupt throttle trace and timers; could occur if safetyswitch is smaller than limits
     }
     else {
-#ifdef PCBTARANIS
+#if defined(VIRTUALINPUTS)
       val = RESX + calibratedStick[g_model.thrTraceSrc == 0 ? THR_STICK : g_model.thrTraceSrc+NUM_STICKS-1];
 #else
       val = RESX + (g_model.thrTraceSrc == 0 ? rawAnas[THR_STICK] : calibratedStick[g_model.thrTraceSrc+NUM_STICKS-1]);
@@ -2217,7 +2224,7 @@ ISR(USART0_UDRE_vect)
 #endif
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
   #define INSTANT_TRIM_MARGIN 10 /* around 1% */
 #else
   #define INSTANT_TRIM_MARGIN 15 /* around 1.5% */
@@ -2225,7 +2232,7 @@ ISR(USART0_UDRE_vect)
 
 void instantTrim()
 {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
   int16_t  anas_0[NUM_INPUTS];
   evalInputs(e_perout_mode_notrainer | e_perout_mode_nosticks);
   memcpy(anas_0, anas, sizeof(anas_0));
@@ -2237,7 +2244,7 @@ void instantTrim()
     if (stick!=THR_STICK) {
       // don't instant trim the throttle stick
       uint8_t trim_phase = getTrimFlightPhase(mixerCurrentFlightMode, stick);
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
       int16_t delta = 0;
       for (int e=0; e<MAX_EXPOS; e++) {
         ExpoData * ed = expoAddress(e);
@@ -2339,7 +2346,7 @@ void moveTrimsToOffsets() // copy state of 3 primary to subtrim
     if (i!=THR_STICK || !g_model.thrTrim) {
       int16_t original_trim = getTrimValue(mixerCurrentFlightMode, i);
       for (uint8_t phase=0; phase<MAX_FLIGHT_MODES; phase++) {
-#if defined(PCBTARANIS)
+#if defined(VIRTUALINPUTS)
         trim_t trim = getRawTrimValue(phase, i);
         if (trim.mode / 2 == phase)
           setTrimValue(phase, i, trim.value - original_trim);

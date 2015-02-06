@@ -56,20 +56,6 @@
   #define CASE_PCBSKY9X(x)
 #endif
 
-#if defined(PCBTARANIS)
-  #define IS_PCBTARANIS()    true
-  #define IF_PCBTARANIS(x)   (x)
-  #define CASE_PCBTARANIS(x) x,
-  #define IF_9X(x)           (0)
-  #define CASE_9X(x)
-#else
-  #define IS_PCBTARANIS()    false
-  #define IF_PCBTARANIS(x)   (0)
-  #define CASE_PCBTARANIS(x)
-  #define IF_9X(x)           (x)
-  #define CASE_9X(x)         x,
-#endif
-
 #if defined(CPUARM)
   #define CASE_CPUARM(x)     x,
   #define IF_CPUARM(x)       x
@@ -88,12 +74,6 @@
   #define CASE_LUA(x) x,
 #else
   #define CASE_LUA(x)
-#endif
-
-#if defined(BATTGRAPH) || defined(PCBTARANIS)
-  #define CASE_BATTGRAPH(x) x,
-#else
-  #define CASE_BATTGRAPH(x)
 #endif
 
 #if defined(CPUARM) || defined(CPUM2560)
@@ -332,37 +312,37 @@ extern void boardInit();
 
 #if defined(PCBTARANIS)
   #if defined(REV9E)
-    #define NUM_SWITCHES  18 // yes, it's a lot!
+    #define NUM_SWITCHES   18 // yes, it's a lot!
   #else
-    #define NUM_SWITCHES  14 // 8 physical switches + 6 possible from 3POS
+    #define NUM_SWITCHES   14 // 8 physical switches + 6 possible from 3POS
   #endif
-  #define NUM_SW_SRCRAW 8
-  #define SWSRC_THR     SWSRC_SF2
-  #define SWSRC_GEA     SWSRC_SG2
-  #define SWSRC_ID0     SWSRC_SA0
-  #define SWSRC_ID1     SWSRC_SA1
-  #define SWSRC_ID2     SWSRC_SA2
-  #define SW_DSM2_BIND  SW_SH2
+  #define NUM_SW_SRCRAW    8
+  #define SWSRC_THR        SWSRC_SF2
+  #define SWSRC_GEA        SWSRC_SG2
+  #define SWSRC_ID0        SWSRC_SA0
+  #define SWSRC_ID1        SWSRC_SA1
+  #define SWSRC_ID2        SWSRC_SA2
+  #define SW_DSM2_BIND     SW_SH2
 #else
-  #define NUM_SWITCHES  7
-  #define IS_3POS(sw)   ((sw) == 0)
+  #define NUM_SWITCHES     7
+  #define IS_3POS(sw)      ((sw) == 0)
   #define IS_MOMENTARY(sw) (sw == SWSRC_TRN)
-  #define NUM_SW_SRCRAW 1
-  #define SW_DSM2_BIND  SW_TRN
+  #define NUM_SW_SRCRAW    1
+  #define SW_DSM2_BIND     SW_TRN
 #endif
 
-#define NUM_PSWITCH     (SWSRC_LAST_SWITCH-SWSRC_FIRST_SWITCH+1)
-#define NUM_POTSSW      (NUM_XPOTS*6)
+#define NUM_PSWITCH        (SWSRC_LAST_SWITCH-SWSRC_FIRST_SWITCH+1)
+#define NUM_POTSSW         (NUM_XPOTS*6)
 
 #if defined(PCBTARANIS)
-  #define KEY_RIGHT  KEY_PLUS
-  #define KEY_LEFT   KEY_MINUS
-  #define KEY_UP     KEY_PLUS
-  #define KEY_DOWN   KEY_MINUS
+  #define KEY_RIGHT        KEY_PLUS
+  #define KEY_LEFT         KEY_MINUS
+  #define KEY_UP           KEY_PLUS
+  #define KEY_DOWN         KEY_MINUS
 #else
-  #define KEY_ENTER  KEY_MENU
-  #define KEY_PLUS   KEY_RIGHT
-  #define KEY_MINUS  KEY_LEFT
+  #define KEY_ENTER        KEY_MENU
+  #define KEY_PLUS         KEY_RIGHT
+  #define KEY_MINUS        KEY_LEFT
 #endif
 
 #include "myeeprom.h"
@@ -471,7 +451,7 @@ enum PotType {
   #define LOAD_MODEL_BITMAP()
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(XCURVES)
   void loadCurves();
   #define LOAD_MODEL_CURVES() loadCurves()
 #else
