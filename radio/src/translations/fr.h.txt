@@ -614,6 +614,8 @@
 #define TR_SWITCHWARNING       TR(IF_CPUARM(INDENT) "Alerte int", INDENT "Pos. interrupteurs")
 #define TR_POTWARNING          TR(IF_CPUARM(INDENT) "Alerte pot", INDENT "Pos. potentiom.")
 #define TR_TIMEZONE            "Fuseau horaire"
+#define TR_ADJUST_RTC          INDENT "Adjust RTC"
+#define TR_GPS                 "GPS"
 #define TR_RXCHANNELORD        TR("Ordre voies RX","Ordre des voies préféré")
 #define TR_SWITCHES_DELAY      "Délai inters son"
 #define TR_SLAVE               "Elève"
