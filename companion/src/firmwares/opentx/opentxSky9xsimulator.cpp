@@ -38,7 +38,7 @@
 #define AUDIO
 #define VOICE
 #define HAPTIC
-// #define PXX
+#define RTCLOCK
 #define DSM2
 #define DSM2_PPM
 #define DBLKEYS
@@ -88,12 +88,14 @@ namespace Open9xSky9x {
 #include "radio/src/timers.cpp"
 #include "radio/src/curves.cpp"
 #include "radio/src/targets/sky9x/pulses_driver.cpp"
+#include "radio/src/targets/sky9x/rtc_driver.cpp"
 #include "radio/src/pulses/pulses_arm.cpp"
 #include "radio/src/tasks_arm.cpp"
 #include "radio/src/stamp.cpp"
 #include "radio/src/maths.cpp"
 #include "radio/src/vario.cpp"
 #include "radio/src/sdcard.cpp"
+#include "radio/src/rtc.cpp"
 #include "radio/src/gui/9X/widgets.cpp"
 #include "radio/src/gui/9X/navigation.cpp"
 #include "radio/src/gui/9X/popups.cpp"
