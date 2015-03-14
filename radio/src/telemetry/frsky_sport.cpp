@@ -472,11 +472,23 @@ bool sportUpdateEnd()
 
 void sportFirmwareUpdate(ModuleIndex module, const char *filename)
 {
-  bool result = sportUpdatePowerOn(module) && sportUpdateReqVersion() && sportUpdateUploadFile(filename) && sportUpdateEnd();
+  bool result = sportUpdatePowerOn(module);
+  if (result)
+  	result = sportUpdateReqVersion();
+  if (result)
+  	result = sportUpdateUploadFile(filename);
+  if (result)
+  	result = sportUpdateEnd();
+  
   if (result == false) {
     POPUP_WARNING("Firmware Update Error");
   }
   sportUpdateState = SPORT_IDLE;
+  
+#if defined(PCBTARANIS)
+  INTERNAL_MODULE_OFF();
+  EXTERNAL_MODULE_OFF();
+#endif
 }
 
 #endif
